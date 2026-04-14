@@ -19,6 +19,10 @@ on:
           - dev
           - prod
 
+      name:
+        description: "Enter resource name to destroy"
+        required: true
+
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -26,19 +30,17 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-
-    # 🔒 Approval required (same as apply)
     environment: ${{ github.event.inputs.environment }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # 🔐 Username restriction (your guard)
-      - name: Restrict User Access
+      # 🔐 Restrict who can run
+      - name: Restrict User
         run: |
-          if [ "${{ github.actor }}" != "poorneshHN" ]; then
-            echo "❌ Unauthorized user"
+          if [ "${{ github.actor }}" != "Poornesh00" ]; then
+            echo "❌ Unauthorized user: ${{ github.actor }}"
             exit 1
           fi
 
@@ -60,19 +62,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # 🔥 IMPORTANT: same backend key logic
+      # 🔥 IMPORTANT: per-resource + per-name state
       - name: Terraform Init
         run: |
           terraform init -reconfigure \
-            -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/self-service.tfstate"
+            -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
-      # 🔍 Show what will be destroyed
+      # 🔍 Preview destroy
       - name: Terraform Plan Destroy
         run: |
           terraform plan -destroy \
             -var="resource_type=${{ github.event.inputs.resource }}" \
             -var="env=${{ github.event.inputs.environment }}" \
-            -var="name=dummy"
+            -var="name=${{ github.event.inputs.name }}"
 
       # 💣 Actual destroy
       - name: Terraform Destroy
@@ -80,15 +82,16 @@ jobs:
           terraform destroy -auto-approve \
             -var="resource_type=${{ github.event.inputs.resource }}" \
             -var="env=${{ github.event.inputs.environment }}" \
-            -var="name=dummy"
+            -var="name=${{ github.event.inputs.name }}"
 
       # 📋 Summary
       - name: Destroy Summary
         run: |
           echo "## 💣 Terraform Destroy Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Resource | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Resource Type | ${{ github.event.inputs.resource }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | ${{ github.event.inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Name | ${{ github.event.inputs.name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | Destroyed ✅ |" >> $GITHUB_STEP_SUMMARY
