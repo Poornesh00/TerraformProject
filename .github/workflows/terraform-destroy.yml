@@ -10,7 +10,6 @@ on:
         options:
           - ec2
           - s3
-
       environment:
         description: "Environment"
         required: true
@@ -18,11 +17,9 @@ on:
         options:
           - dev
           - prod
-
       name:
         description: "Enter resource name to destroy"
         required: true
-
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -30,7 +27,6 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,8 +39,19 @@ jobs:
             exit 1
           fi
 
+      # ✅ Validate DESTROY confirmation
+      - name: Validate Confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "DESTROY" ]; then
+            echo "❌ Confirmation failed. You must type DESTROY to proceed."
+            exit 1
+          fi
+
+      # ✅ terraform_wrapper: false — prevents stdout interference with destroy
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -53,30 +60,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # 🔥 IMPORTANT: per-resource + per-name state
+      # ✅ Only overrides the key; bucket/region/dynamodb come from backend.tf
       - name: Terraform Init
         run: |
           terraform init -reconfigure \
             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
-      # 🔍 Preview destroy
+      # 🔍 Preview destroy and save plan to file
       - name: Terraform Plan Destroy
         run: |
           terraform plan -destroy \
             -var="resource_type=${{ github.event.inputs.resource }}" \
             -var="env=${{ github.event.inputs.environment }}" \
-            -var="name=${{ github.event.inputs.name }}"
+            -var="name=${{ github.event.inputs.name }}" \
+            -out=destroy.tfplan
 
-      # 💣 Actual destroy
+      # 💣 Apply the saved destroy plan — deterministic, no re-evaluation
       - name: Terraform Destroy
-        run: |
-          terraform destroy -auto-approve \
-            -var="resource_type=${{ github.event.inputs.resource }}" \
-            -var="env=${{ github.event.inputs.environment }}" \
-            -var="name=${{ github.event.inputs.name }}"
+        run: terraform apply -auto-approve destroy.tfplan
 
-      # 📋 Summary
+      # 📋 Summary — only shown on success
       - name: Destroy Summary
+        if: success()
         run: |
           echo "## 💣 Terraform Destroy Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -85,4 +90,19 @@ jobs:
           echo "| Resource Type | ${{ github.event.inputs.resource }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | ${{ github.event.inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Name | ${{ github.event.inputs.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Destroyed By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | Destroyed ✅ |" >> $GITHUB_STEP_SUMMARY
+
+      # ❌ Failure summary
+      - name: Destroy Failed Summary
+        if: failure()
+        run: |
+          echo "## ❌ Terraform Destroy FAILED" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource Type | ${{ github.event.inputs.resource }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Name | ${{ github.event.inputs.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Destroyed By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ❌ Failed — check logs above |" >> $GITHUB_STEP_SUMMARY
