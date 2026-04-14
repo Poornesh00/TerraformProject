@@ -60,7 +60,9 @@ jobs:
           aws-region: ap-south-1
 
       - name: Terraform Init
-        run: terraform init -reconfigure
+        run: |
+          terraform init -reconfigure \
+             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/self-service.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
@@ -89,9 +91,6 @@ jobs:
             echo "❌ Unauthorized user"
             exit 1
           fi
-          
-      - name: Waiting for Approval
-        run: echo "⏸️ Waiting for approval for ${{ github.event.inputs.environment }} environment"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -104,7 +103,9 @@ jobs:
           aws-region: ap-south-1
 
       - name: Terraform Init
-        run: terraform init -reconfigure
+        run: |
+          terraform init -reconfigure \
+             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/self-service.tfstate"
 
       - name: Terraform Apply
         run: |
