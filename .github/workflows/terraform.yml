@@ -28,7 +28,7 @@ on:
         required: true
 
 jobs:
-  plan & apply:
+  apply:
     runs-on: ubuntu-latest
 
     steps:
