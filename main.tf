@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "demo" {
 resource "aws_instance" "ec2" {
   count         = var.resource_type == "ec2" ? 1 : 0
   ami           = data.aws_ami.amazon_linux.id
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
 
 key_name = "aws-login"
 
