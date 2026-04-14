@@ -35,12 +35,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-- name: Restrict User Access
-  run: |
-    if [ "${{ github.actor }}" != "Poornesh00" ]; then
-      echo "❌ Unauthorized user"
-      exit 1
-    fi
+      - name: Restrict User Access
+        run: |
+          if [ "${{ github.actor }}" != "Poornesh00" ]; then
+            echo "❌ Unauthorized user"
+            exit 1
+          fi
 
       - name: Safety Check
         run: |
@@ -83,12 +83,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-- name: Restrict User Access
-  run: |
-    if [ "${{ github.actor }}" != "Poornesh00" ]; then
-      echo "❌ Unauthorized user"
-      exit 1
-    fi
+      - name: Restrict User Access
+        run: |
+          if [ "${{ github.actor }}" != "Poornesh00" ]; then
+            echo "❌ Unauthorized user"
+            exit 1
+          fi
           
       - name: Waiting for Approval
         run: echo "⏸️ Waiting for approval for ${{ github.event.inputs.environment }} environment"
