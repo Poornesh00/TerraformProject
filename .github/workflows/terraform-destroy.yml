@@ -20,6 +20,9 @@ on:
       name:
         description: "Enter resource name to destroy"
         required: true
+      instance_id:
+        description: "EC2 Instance ID (e.g. i-0abc123) — only needed if not in state"
+        required: false
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -47,7 +50,6 @@ jobs:
             exit 1
           fi
 
-      # ✅ terraform_wrapper: false — prevents stdout interference with destroy
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -60,13 +62,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # ✅ Only overrides the key; bucket/region/dynamodb come from backend.tf
       - name: Terraform Init
         run: |
           terraform init -reconfigure \
             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
-      # 🔍 Preview destroy and save plan to file
+      # ✅ Import EC2 into state if instance_id is provided
+      - name: Terraform Import (if instance_id provided)
+        if: ${{ github.event.inputs.instance_id != '' }}
+        run: |
+          echo "Importing ${{ github.event.inputs.instance_id }} into state..."
+          terraform import \
+            -var="resource_type=${{ github.event.inputs.resource }}" \
+            -var="env=${{ github.event.inputs.environment }}" \
+            -var="name=${{ github.event.inputs.name }}" \
+            aws_instance.this ${{ github.event.inputs.instance_id }}
+
+      # 🔍 Preview destroy
       - name: Terraform Plan Destroy
         run: |
           terraform plan -destroy \
@@ -75,11 +87,11 @@ jobs:
             -var="name=${{ github.event.inputs.name }}" \
             -out=destroy.tfplan
 
-      # 💣 Apply the saved destroy plan — deterministic, no re-evaluation
+      # 💣 Destroy
       - name: Terraform Destroy
         run: terraform apply -auto-approve destroy.tfplan
 
-      # 📋 Summary — only shown on success
+      # 📋 Success summary
       - name: Destroy Summary
         if: success()
         run: |
@@ -90,6 +102,7 @@ jobs:
           echo "| Resource Type | ${{ github.event.inputs.resource }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | ${{ github.event.inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Name | ${{ github.event.inputs.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Instance ID | ${{ github.event.inputs.instance_id }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Destroyed By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | Destroyed ✅ |" >> $GITHUB_STEP_SUMMARY
 
