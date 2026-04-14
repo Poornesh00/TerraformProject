@@ -168,13 +168,7 @@ This prevents accidental deletion of unrelated resources.
 - 🔍 Resource listing before destroy  
 - 🚫 Prevent destroy in production  
 - 🔐 OIDC authentication (no AWS keys)  
-- 📈 Cost monitoring integration  
-
----
-
-## 🤝 Contributing
-
-Feel free to fork and improve this project.
+- 📈 Cost monitoring integration
 
 ---
 
@@ -189,5 +183,3 @@ This project is licensed under the MIT License.
 **Poornesh H N**
 
 ---
-
-⭐ If you found this useful, give it a star!
