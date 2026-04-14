@@ -27,8 +27,7 @@ output "ec2_instance_id" {
 ########################################
 output "ssh_command" {
   description = "SSH command to connect"
-  value = length(aws_instance.ec2) > 0 ?
-    "ssh -i aws-login.pem ec2-user@${aws_instance.ec2[0].public_ip}" : null
+  value = length(aws_instance.ec2) > 0 ? "ssh -i aws-login.pem ec2-user@${aws_instance.ec2[0].public_ip}" : null
     null
 }
 
