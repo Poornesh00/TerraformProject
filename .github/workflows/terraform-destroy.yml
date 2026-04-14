@@ -30,7 +30,6 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
 
     steps:
       - name: Checkout
@@ -41,14 +40,6 @@ jobs:
         run: |
           if [ "${{ github.actor }}" != "Poornesh00" ]; then
             echo "❌ Unauthorized user: ${{ github.actor }}"
-            exit 1
-          fi
-
-      # 🛑 Strong confirmation
-      - name: Confirm Destroy
-        run: |
-          if [ "${{ github.event.inputs.confirm }}" != "DESTROY" ]; then
-            echo "❌ You must type DESTROY to proceed"
             exit 1
           fi
 
