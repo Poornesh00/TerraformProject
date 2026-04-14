@@ -76,7 +76,7 @@ jobs:
             -var="resource_type=${{ github.event.inputs.resource }}" \
             -var="env=${{ github.event.inputs.environment }}" \
             -var="name=${{ github.event.inputs.name }}" \
-            aws_instance.this ${{ github.event.inputs.instance_id }}
+            aws_instance.ec2 ${{ github.event.inputs.instance_id }}
 
       # 🔍 Preview destroy
       - name: Terraform Plan Destroy
