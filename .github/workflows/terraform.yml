@@ -106,7 +106,10 @@ jobs:
         run: |
           echo "## 🚀 Terraform Outputs" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Instance ID:** $(jq -r '.ec2_instance_id.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
-          echo "**Public IP:** $(jq -r '.ec2_public_ip.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
-          echo "**Public DNS:** $(jq -r '.ec2_public_dns.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
-          echo "**Resource:** $(jq -r '.resource_created.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
+
+          echo "| Resource | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Instance ID | $(jq -r '.ec2_instance_id.value' tf-output.json) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Public IP | $(jq -r '.ec2_public_ip.value' tf-output.json) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Public DNS | $(jq -r '.ec2_public_dns.value' tf-output.json) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource Type | $(jq -r '.resource_created.value' tf-output.json) |" >> $GITHUB_STEP_SUMMARY
