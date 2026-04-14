@@ -1,3 +1,3 @@
-output "bucket_name" {
-  value = aws_s3_bucket.demo.bucket
+output "resource_created" {
+  value = var.resource_type
 }
