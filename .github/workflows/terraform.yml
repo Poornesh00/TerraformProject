@@ -28,7 +28,7 @@ on:
         required: true
 
 jobs:
-  plan:
+  plan & apply:
     runs-on: ubuntu-latest
 
     steps:
@@ -62,7 +62,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init -reconfigure \
-             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/self-service.tfstate"
+             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
@@ -73,39 +73,6 @@ jobs:
             -var="resource_type=${{ github.event.inputs.resource }}" \
             -var="env=${{ github.event.inputs.environment }}" \
             -var="name=${{ github.event.inputs.name }}"
-
-  apply:
-    needs: plan
-    runs-on: ubuntu-latest
-
-    # 🔥 Approval controlled by GitHub Environment
-    environment: ${{ github.event.inputs.environment }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Restrict User Access
-        run: |
-          if [ "${{ github.actor }}" != "Poornesh00" ]; then
-            echo "❌ Unauthorized user"
-            exit 1
-          fi
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
-
-      - name: Terraform Init
-        run: |
-          terraform init -reconfigure \
-             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/self-service.tfstate"
 
       - name: Terraform Apply
         run: |
