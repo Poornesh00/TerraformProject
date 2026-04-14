@@ -1,15 +1,27 @@
-name: Create AWS Res by Tf
+name: Terraform Self-Service
 
 on:
   workflow_dispatch:
     inputs:
       resource:
-        description: "Select resource"
+        description: "Select resource to create"
         required: true
         type: choice
         options:
           - ec2
           - s3
+
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+      name:
+        description: "Enter resource name (lowercase, no spaces)"
+        required: true
 
       confirm:
         description: "Type YES to confirm"
@@ -20,19 +32,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repo
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Safety check before doing anything
       - name: Safety Check
         run: |
           if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
-            echo "Confirmation failed. Type YES to proceed."
+            echo "❌ Confirmation failed. Type YES to proceed."
             exit 1
           fi
 
+      # Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -40,10 +56,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
+      # Initialize Terraform backend
       - name: Terraform Init
         run: terraform init -reconfigure
 
+      # Validate Terraform files
+      - name: Terraform Validate
+        run: terraform validate
+
+      # Plan (for visibility in logs)
+      - name: Terraform Plan
+        run: terraform plan \
+          -var="resource_type=${{ github.event.inputs.resource }}" \
+          -var="env=${{ github.event.inputs.environment }}" \
+          -var="name=${{ github.event.inputs.name }}"
+
+      # Apply (actual creation)
       - name: Terraform Apply
         run: terraform apply -auto-approve \
           -var="resource_type=${{ github.event.inputs.resource }}" \
-          -var="env=${{ github.event.inputs.environment }}"
+          -var="env=${{ github.event.inputs.environment }}" \
+          -var="name=${{ github.event.inputs.name }}"
