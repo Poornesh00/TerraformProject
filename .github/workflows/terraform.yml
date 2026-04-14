@@ -74,7 +74,8 @@ jobs:
 
       # Apply (actual creation)
       - name: Terraform Apply
-        run: terraform apply -auto-approve \
+        run: |
+         terraform apply -auto-approve \
           -var="resource_type=${{ github.event.inputs.resource }}" \
           -var="env=${{ github.event.inputs.environment }}" \
           -var="name=${{ github.event.inputs.name }}"
