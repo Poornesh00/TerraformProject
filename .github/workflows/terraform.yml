@@ -1,4 +1,4 @@
-name: Terraform Self-Service
+name: Create Resource by Terraform
 
 on:
   workflow_dispatch:
