@@ -21,7 +21,7 @@ on:
         description: "Enter resource name to destroy"
         required: true
       instance_id:
-        description: "EC2 Instance ID (e.g. i-0abc123) — only needed if not in state"
+        description: "Resource ID (e.g. i-0abc123) — only needed if not in state"
         required: false
       confirm:
         description: "Type DESTROY to confirm"
@@ -68,7 +68,7 @@ jobs:
             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
       # ✅ FIXED: correct import address with [0] for count-based resources
-      - name: Terraform Import (if instance_id provided)
+      - name: Terraform Import (if resource_id provided)
         if: ${{ github.event.inputs.instance_id != '' }}
         run: |
           echo "Importing ${{ github.event.inputs.instance_id }} into state..."
