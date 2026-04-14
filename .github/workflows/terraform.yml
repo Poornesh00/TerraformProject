@@ -35,16 +35,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Restrict User Access
-        run: |
-          ALLOWED_USERS=("Poornesh0")
-
-          if [[ ! " ${ALLOWED_USERS[@]} " =~ " ${{ github.actor }} " ]]; then
-          echo "❌ User '${{ github.actor }}' is NOT authorized to run this workflow"
-          exit 1
-          fi
-
-          echo "✅ User '${{ github.actor }}' is authorized"
+- name: Restrict User Access
+  run: |
+    if [ "${{ github.actor }}" != "Poornesh00" ]; then
+      echo "❌ Unauthorized user"
+      exit 1
+    fi
 
       - name: Safety Check
         run: |
@@ -87,16 +83,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Restrict User Access
-        run: |
-          ALLOWED_USERS=("Poornesh0")
-
-          if [[ ! " ${ALLOWED_USERS[@]} " =~ " ${{ github.actor }} " ]]; then
-          echo "❌ User '${{ github.actor }}' is NOT authorized to run this workflow"
-          exit 1
-          fi
-
-          echo "✅ User '${{ github.actor }}' is authorized"
+- name: Restrict User Access
+  run: |
+    if [ "${{ github.actor }}" != "Poornesh00" ]; then
+      echo "❌ Unauthorized user"
+      exit 1
+    fi
           
       - name: Waiting for Approval
         run: echo "⏸️ Waiting for approval for ${{ github.event.inputs.environment }} environment"
