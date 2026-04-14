@@ -1,7 +1,19 @@
-name: Terraform CI/CD
+name: Create AWS Res by Tf
 
 on:
   workflow_dispatch:
+    inputs:
+      resource:
+        description: "Select resource"
+        required: true
+        type: choice
+        options:
+          - ec2
+          - s3
+
+      confirm:
+        description: "Type YES to confirm"
+        required: true
 
 jobs:
   terraform:
@@ -10,6 +22,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Safety Check
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
+            echo "Confirmation failed. Type YES to proceed."
+            exit 1
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -22,13 +41,9 @@ jobs:
           aws-region: ap-south-1
 
       - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan
+        run: terraform init -reconfigure
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve \
+          -var="resource_type=${{ github.event.inputs.resource }}" \
+          -var="env=${{ github.event.inputs.environment }}"
