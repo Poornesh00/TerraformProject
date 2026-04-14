@@ -15,7 +15,7 @@ data "aws_ami" "amazon_linux" {
 ########################################
 # S3 Bucket (Controlled)
 ########################################
-resource "aws_s3_bucket" "demo" {
+resource "aws_s3_bucket" "s3" {
   count  = var.resource_type == "s3" ? 1 : 0
   bucket = var.name
 
