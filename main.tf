@@ -17,10 +17,10 @@ data "aws_ami" "amazon_linux" {
 ########################################
 resource "aws_s3_bucket" "demo" {
   count  = var.resource_type == "s3" ? 1 : 0
-  bucket = "poornesh-${var.env}-bucket"
+  bucket = var.name
 
   tags = {
-    Name        = "poornesh-${var.env}-bucket"
+    Name        = var.name
     Environment = var.env
     Project     = "self-service"
   }
@@ -39,7 +39,7 @@ resource "aws_instance" "ec2" {
   instance_type = "t2.micro"
 
   tags = {
-    Name        = "poornesh-${var.env}-ec2"
+    Name        = var.name
     Environment = var.env
     Project     = "self-service"
   }
