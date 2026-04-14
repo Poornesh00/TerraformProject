@@ -23,6 +23,14 @@ output "ec2_instance_id" {
 }
 
 ########################################
+# S3 Bucket Name
+########################################
+output "s3_bucket_name" {
+  description = "S3 Bucket Name"
+  value       = length(aws_s3_bucket.s3) > 0 ? aws_s3_bucket.s3[0].bucket : null
+}
+
+########################################
 # Created Resource Type
 ########################################
 output "resource_created" {
