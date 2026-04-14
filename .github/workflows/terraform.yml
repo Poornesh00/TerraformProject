@@ -28,15 +28,13 @@ on:
         required: true
 
 jobs:
-  terraform:
+  plan:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Safety check before doing anything
       - name: Safety Check
         run: |
           if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
@@ -44,11 +42,9 @@ jobs:
             exit 1
           fi
 
-      # Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -56,26 +52,61 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # Initialize Terraform backend
       - name: Terraform Init
         run: terraform init -reconfigure
 
-      # Validate Terraform files
       - name: Terraform Validate
         run: terraform validate
 
-      # Plan (for visibility in logs)
       - name: Terraform Plan
         run: |
-         terraform plan \
-          -var="resource_type=${{ github.event.inputs.resource }}" \
-          -var="env=${{ github.event.inputs.environment }}" \
-          -var="name=${{ github.event.inputs.name }}"
+          terraform plan \
+            -var="resource_type=${{ github.event.inputs.resource }}" \
+            -var="env=${{ github.event.inputs.environment }}" \
+            -var="name=${{ github.event.inputs.name }}"
 
-      # Apply (actual creation)
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+
+    # 🔥 Approval controlled by GitHub Environment
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Waiting for Approval
+        run: echo "⏸️ Waiting for approval for ${{ github.event.inputs.environment }} environment"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
       - name: Terraform Apply
         run: |
-         terraform apply -auto-approve \
-          -var="resource_type=${{ github.event.inputs.resource }}" \
-          -var="env=${{ github.event.inputs.environment }}" \
-          -var="name=${{ github.event.inputs.name }}"
+          terraform apply -auto-approve \
+            -var="resource_type=${{ github.event.inputs.resource }}" \
+            -var="env=${{ github.event.inputs.environment }}" \
+            -var="name=${{ github.event.inputs.name }}"
+
+      - name: Capture Terraform Outputs
+        run: terraform output -json > tf-output.json
+
+      - name: Show Outputs in Summary
+        run: |
+          echo "## 🚀 Terraform Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Instance ID:** $(jq -r '.ec2_instance_id.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
+          echo "**Public IP:** $(jq -r '.ec2_public_ip.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
+          echo "**Public DNS:** $(jq -r '.ec2_public_dns.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
+          echo "**Resource:** $(jq -r '.resource_created.value' tf-output.json)" >> $GITHUB_STEP_SUMMARY
