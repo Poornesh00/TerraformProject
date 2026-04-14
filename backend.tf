@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket         = "YOUR_UNIQUE_NAME"
-    key            = "dev/terraform.tfstate"
+    bucket         = "poornesh-terraform-state-2026"
+    key            = "default.tfstate"   # placeholder
     region         = "ap-south-1"
     dynamodb_table = "terraform-locks"
     encrypt        = true
