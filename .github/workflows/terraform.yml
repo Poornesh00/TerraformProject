@@ -66,7 +66,8 @@ jobs:
 
       # Plan (for visibility in logs)
       - name: Terraform Plan
-        run: terraform plan \
+        run: |
+         terraform plan \
           -var="resource_type=${{ github.event.inputs.resource }}" \
           -var="env=${{ github.event.inputs.environment }}" \
           -var="name=${{ github.event.inputs.name }}"
