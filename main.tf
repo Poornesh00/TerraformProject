@@ -24,10 +24,6 @@ resource "aws_s3_bucket" "s3" {
     Environment = var.env
     Project     = "self-service"
   }
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 ########################################
