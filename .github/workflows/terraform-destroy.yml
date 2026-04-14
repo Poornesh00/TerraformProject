@@ -67,16 +67,26 @@ jobs:
           terraform init -reconfigure \
             -backend-config="key=${{ github.event.inputs.environment }}/${{ github.event.inputs.resource }}/${{ github.event.inputs.name }}.tfstate"
 
-      # ✅ Import EC2 into state if instance_id is provided
+      # ✅ FIXED: correct import address with [0] for count-based resources
       - name: Terraform Import (if instance_id provided)
         if: ${{ github.event.inputs.instance_id != '' }}
         run: |
           echo "Importing ${{ github.event.inputs.instance_id }} into state..."
-          terraform import \
-            -var="resource_type=${{ github.event.inputs.resource }}" \
-            -var="env=${{ github.event.inputs.environment }}" \
-            -var="name=${{ github.event.inputs.name }}" \
-            aws_instance.ec2 ${{ github.event.inputs.instance_id }}
+
+          if [ "${{ github.event.inputs.resource }}" == "ec2" ]; then
+            terraform import \
+              -var="resource_type=${{ github.event.inputs.resource }}" \
+              -var="env=${{ github.event.inputs.environment }}" \
+              -var="name=${{ github.event.inputs.name }}" \
+              'aws_instance.ec2[0]' ${{ github.event.inputs.instance_id }}
+
+          elif [ "${{ github.event.inputs.resource }}" == "s3" ]; then
+            terraform import \
+              -var="resource_type=${{ github.event.inputs.resource }}" \
+              -var="env=${{ github.event.inputs.environment }}" \
+              -var="name=${{ github.event.inputs.name }}" \
+              'aws_s3_bucket.s3[0]' ${{ github.event.inputs.instance_id }}
+          fi
 
       # 🔍 Preview destroy
       - name: Terraform Plan Destroy
