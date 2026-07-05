@@ -44,6 +44,5 @@ locals {
   security_groups = {
     default    = "sg-067f08a882f54b94b"
     ssh-access = "sg-0123456789abcdef0"
-    web-server = "sg-0fedcba9876543210"
   }
 }
