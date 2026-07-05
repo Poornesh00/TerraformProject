@@ -31,4 +31,8 @@ resource "aws_instance" "ec2" {
 
 key_name = "aws-login"
 
+vpc_security_group_ids = [
+    local.security_groups[var.security_group]
+  ]
+
 }
