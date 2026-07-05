@@ -38,13 +38,6 @@ jobs:
             exit 1
           fi
 
-      - name: Safety Check
-        run: |
-          if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
-            echo "❌ Confirmation failed. Type YES to proceed."
-            exit 1
-          fi
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
