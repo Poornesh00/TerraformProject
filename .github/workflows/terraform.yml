@@ -82,7 +82,7 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -var="resource_type=${{ github.event.inputs.resource }}" \
-            -var="name=${{ github.event.inputs.name }}"
+            -var="name=${{ github.event.inputs.name }}" \
             -var="security_group=${{ github.event.inputs.security_group }}"
 
       - name: Capture Terraform Outputs
