@@ -14,3 +14,9 @@ variable "name" {
 variable "instance_type" {
   default = "t3.micro"
 }
+
+variable "security_group" {
+  description = "Security Group name selected from GitHub Actions"
+  type        = string
+  default     = null
+}
