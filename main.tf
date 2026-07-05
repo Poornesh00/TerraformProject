@@ -19,11 +19,6 @@ resource "aws_s3_bucket" "s3" {
   count  = var.resource_type == "s3" ? 1 : 0
   bucket = var.name
 
-  tags = {
-    Name        = var.name
-    Environment = var.env
-    Project     = "self-service"
-  }
 }
 
 ########################################
@@ -36,9 +31,4 @@ resource "aws_instance" "ec2" {
 
 key_name = "aws-login"
 
-  tags = {
-    Name        = var.name
-    Environment = var.env
-    Project     = "self-service"
-  }
 }
