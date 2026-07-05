@@ -43,6 +43,6 @@ vpc_security_group_ids = [
 locals {
   security_groups = {
     default    = "sg-067f08a882f54b94b"
-    ssh-access = "sg-0123456789abcdef0"
+    ssh-access = "sg-0616e18067aecc364"
   }
 }
