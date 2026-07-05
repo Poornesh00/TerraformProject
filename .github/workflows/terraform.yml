@@ -23,6 +23,15 @@ on:
         description: "Enter resource name (lowercase, no spaces)"
         required: true
 
+      security_group:
+        description: "Select Security Group (Required for EC2 only)"
+        required: false
+        type: choice
+        options:
+          - default
+          - ssh-access
+          - web-server
+
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -35,6 +44,13 @@ jobs:
         run: |
           if [ "${{ github.actor }}" != "Poornesh00" ]; then
             echo "❌ Unauthorized user"
+            exit 1
+          fi
+
+      - name: Validate Inputs
+        run: |
+          if [ "${{ github.event.inputs.resource }}" = "ec2" ] && [ -z "${{ github.event.inputs.security_group }}" ]; then
+            echo "❌ Security Group is required when creating an EC2 instance."
             exit 1
           fi
 
