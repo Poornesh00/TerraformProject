@@ -23,10 +23,6 @@ on:
         description: "Enter resource name (lowercase, no spaces)"
         required: true
 
-      confirm:
-        description: "Type YES to confirm"
-        required: true
-
 jobs:
   apply:
     runs-on: ubuntu-latest
