@@ -25,7 +25,7 @@ on:
 
       security_group:
         description: "Select Security Group (Required for EC2 only)"
-        required: false
+        required: true
         type: choice
         options:
           - default
