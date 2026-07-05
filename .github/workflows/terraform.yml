@@ -11,14 +11,6 @@ on:
           - ec2
           - s3
 
-      environment:
-        description: "Environment"
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
-
       name:
         description: "Enter resource name (lowercase, no spaces)"
         required: true
@@ -43,13 +35,6 @@ jobs:
         run: |
           if [ "${{ github.actor }}" != "Poornesh00" ]; then
             echo "❌ Unauthorized user"
-            exit 1
-          fi
-
-      - name: Validate Inputs
-        run: |
-          if [ "${{ github.event.inputs.resource }}" = "ec2" ] && [ -z "${{ github.event.inputs.security_group }}" ]; then
-            echo "❌ Security Group is required when creating an EC2 instance."
             exit 1
           fi
 
