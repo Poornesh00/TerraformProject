@@ -14,5 +14,4 @@ variable "instance_type" {
 variable "security_group" {
   description = "Security Group name selected from GitHub Actions"
   type        = string
-  default     = null
 }
