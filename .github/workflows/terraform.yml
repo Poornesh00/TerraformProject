@@ -71,11 +71,11 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Debug GitHub Inputs
-        run: |
-          echo "Resource       : '${{ github.event.inputs.resource }}'"
-          echo "Name           : '${{ github.event.inputs.name }}'"
-          echo "Security Group : '${{ github.event.inputs.security_group }}'"
+    #  - name: Debug GitHub Inputs
+    #    run: |
+     #     echo "Resource       : '${{ github.event.inputs.resource }}'"
+      #    echo "Name           : '${{ github.event.inputs.name }}'"
+       #   echo "Security Group : '${{ github.event.inputs.security_group }}'"
 
       - name: Terraform Plan
         run: |
